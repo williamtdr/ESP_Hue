@@ -6,6 +6,7 @@
     Written by: Richard Wardlow @ Circuits for Fun, LLC
     GNU GPL, include above text in redistribution
 ***************************************************************************/
+#pragma once
 #include <ESP8266WiFi.h>
 
 ////////////////////////////////////////
@@ -36,7 +37,7 @@ class ESPHue
 		const char* _apiKey;
 		uint8_t _port;
 		WiFiClient* _client;
-		
+		void sendPut(String url, String json);
 };
 
 
