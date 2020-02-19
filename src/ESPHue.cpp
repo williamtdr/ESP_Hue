@@ -16,13 +16,13 @@
 // ESPHue Class Methods
 ////////////////////////////////////////
 StaticJsonDocument<1500> doc;
+unsigned long last_update = 0;
 ESPHue::ESPHue(WiFiClient& client, const char* APIKey, const char* host, uint8_t port)
 {
 	_client = &client;
 	_apiKey = APIKey;
 	_host = host;
 	_port = port;
-
 }
 
 void ESPHue::setAPIKey(const char* APIKey)
@@ -103,6 +103,11 @@ void ESPHue::setLightPower(byte lightNum, byte state)
 
 String ESPHue::getGroupInfo(byte groupNum)
 {
+  unsigned long now = millis();
+  if (last_update && last_update + 600000 >= now){
+    return "";
+  }
+  last_update = now;
   HTTPClient http;
   String url = "http://" + String(_host)  +"/api/" + String(_apiKey) + "/groups/" + groupNum;
   http.begin(url);
@@ -110,7 +115,6 @@ String ESPHue::getGroupInfo(byte groupNum)
   if (httpCode <= 0)
     return "";
   String payload = http.getString();
-  Serial.println(payload);
   http.end();
   DeserializationError error = deserializeJson(doc, payload);
   if (error) {
@@ -156,7 +160,7 @@ void ESPHue::setGroup(byte groupNum, byte state, byte sat, byte bri, unsigned in
 void ESPHue::sendPut(String url, String json){
   String _url = "http://" + String(_host)  +"/api/" + String(_apiKey) + url;
   HTTPClient http;
-  http.begin(url);
+  http.begin(_url);
   http.addHeader("Content-Type", "application/json");
   http.PUT(json);
   http.end();
@@ -165,6 +169,7 @@ void ESPHue::sendPut(String url, String json){
 void ESPHue::setGroupPower(byte groupNum, byte state)
 {
   String url = "/groups/" + String(groupNum) + "/action";
-  String cmd = state == 1 ? "{\"on\":true}": "{\"on\":false}";
+  String cmd = state ? "{\"on\":true}": "{\"on\":false}";
+  doc["state"]["any_on"] = (bool)state;
   sendPut(url, cmd);
 }
