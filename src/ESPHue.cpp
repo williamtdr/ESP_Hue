@@ -48,7 +48,7 @@ String ESPHue::getLightInfo(byte lightNum)
   }
   HTTPClient http;
   String url = "http://" + String(_host) + "/api/" + String(_apiKey) + "/lights/" + lightNum;
-  http.begin(_client, url);
+  http.begin(*_client, url);
   int httpCode = http.GET();
   if (httpCode <= 0)
     return "";
@@ -139,7 +139,7 @@ String ESPHue::getGroupInfo(byte groupNum)
   last_update = now;
   HTTPClient http;
   String url = "http://" + String(_host)  +"/api/" + String(_apiKey) + "/groups/" + groupNum;
-  http.begin(_client, url);
+  http.begin(*_client, url);
   int httpCode = http.GET();
   if (httpCode <= 0)
     return "";
@@ -197,7 +197,7 @@ void ESPHue::setGroup(byte groupNum, byte state, byte sat, byte bri, unsigned in
 void ESPHue::sendPut(String url, String json){
   String _url = "http://" + String(_host)  +"/api/" + String(_apiKey) + url;
   HTTPClient http;
-  http.begin(_client, _url);
+  http.begin(*_client, _url);
   http.addHeader("Content-Type", "application/json");
   http.PUT(json);
   http.end();
