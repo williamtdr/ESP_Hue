@@ -20,9 +20,9 @@ ESPHue::ESPHue(WiFiClient& client, const char* APIKey, const char* host, uint8_t
 	_apiKey = APIKey;
 	_host = host;
 	_port = port;
-  last_update = 0;
-  last_id = 330;
-  last_is_group = false;
+	last_update = 0;
+	last_id = 0;
+	last_is_group = false;
 }
 
 void ESPHue::setAPIKey(const char* APIKey)
@@ -48,7 +48,7 @@ String ESPHue::getLightInfo(byte lightNum)
   }
   HTTPClient http;
   String url = "http://" + String(_host) + "/api/" + String(_apiKey) + "/lights/" + lightNum;
-  http.begin(url);
+  http.begin(_client, url);
   int httpCode = http.GET();
   if (httpCode <= 0)
     return "";
@@ -139,7 +139,7 @@ String ESPHue::getGroupInfo(byte groupNum)
   last_update = now;
   HTTPClient http;
   String url = "http://" + String(_host)  +"/api/" + String(_apiKey) + "/groups/" + groupNum;
-  http.begin(url);
+  http.begin(_client, url);
   int httpCode = http.GET();
   if (httpCode <= 0)
     return "";
@@ -197,7 +197,7 @@ void ESPHue::setGroup(byte groupNum, byte state, byte sat, byte bri, unsigned in
 void ESPHue::sendPut(String url, String json){
   String _url = "http://" + String(_host)  +"/api/" + String(_apiKey) + url;
   HTTPClient http;
-  http.begin(_url);
+  http.begin(_client, _url);
   http.addHeader("Content-Type", "application/json");
   http.PUT(json);
   http.end();
